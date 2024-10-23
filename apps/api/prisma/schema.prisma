@@ -1,0 +1,70 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+enum MediaType {
+  IMAGE
+  VIDEO
+}
+
+model Media {
+  id          String       @id @default(cuid())
+  title       String
+  src         String
+  type        MediaType
+  WorkOfArt   WorkOfArt?   @relation(fields: [workOfArtId], references: [id])
+  workOfArtId String?
+  Exhibition  Exhibition[]
+  Collection  Collection[]
+}
+
+model Exhibition {
+  id          String      @id @default(cuid())
+  title       String
+  subtitle    String
+  description String
+  workOfArts  WorkOfArt[]
+  cover       Media       @relation(fields: [mediaId], references: [id])
+  startDate   DateTime
+  endDate     DateTime
+  createdAt   DateTime    @default(now())
+  updatedAt   DateTime    @updatedAt
+  mediaId     String
+}
+
+model Collection {
+  id          String      @id @default(cuid())
+  title       String
+  subtitle    String
+  description String
+  cover       Media       @relation(fields: [mediaId], references: [id])
+  workOfArts  WorkOfArt[]
+  mediaId     String
+}
+
+model WorkOfArt {
+  id           String      @id @default(cuid())
+  title        String
+  subtitle     String
+  description  String
+  artist       String
+  date         DateTime
+  medias       Media[]
+  createdAt    DateTime    @default(now())
+  updatedAt    DateTime    @updatedAt
+  Collection   Collection? @relation(fields: [collectionId], references: [id])
+  collectionId String?
+  Exhibition   Exhibition? @relation(fields: [exhibitionId], references: [id])
+  exhibitionId String?
+}
